@@ -27,3 +27,5 @@ Hasta hesabını kayıt sayfasından oluşturabilir. Çalışan girişi için ha
 - ayse@medicore.com / 1234(doktor)
 
 Veriler kurgusaldır, şifreler LocalStorage'da düz yazı olarak duruyor, sadece demo için.
+
+Netlify: https://medicore-randevu.netlify.app
