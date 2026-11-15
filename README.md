@@ -2,8 +2,9 @@
 
 Hastane randevu sistemi. Web Geliştirme dersi JavaScript projesi olarak hazırladım. Backend yok, veriler tarayıcının LocalStorage'ında tutuluyor.
 
+Canlı site: medicore-randevu.netlify.app
 
-Kullandıklarım: React, TypeScript, Vite, Tailwind CSS, Router.
+Kullandıklarım: React, TypeScript, Vite, Tailwind CSS, React Router.
 
 ## Neler yapılabiliyor
 
@@ -20,9 +21,9 @@ npm run dev
 
 ## Giriş bilgileri
 
-Hasta hesabını kayıt sayfasından oluşturabilirsin. Çalışan girişi için hazır hesaplar var, şifreleri 1234:
+Hasta hesabını kayıt sayfasından oluşturabilir. Çalışan girişi için hazır hesaplar var.
 
 - admin@medicore.com / 1234 (yönetim)
-- ayse@medicore.com / 1234 (doktor)
+- ayse@medicore.com / 1234(doktor)
 
 Veriler kurgusaldır, şifreler LocalStorage'da düz yazı olarak duruyor, sadece demo için.
