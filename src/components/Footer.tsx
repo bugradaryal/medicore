@@ -1,7 +1,7 @@
 export default function Footer() {
   return (
     <footer className="bg-slate-800 text-slate-300 text-sm">
-      <div className="max-w-5xl mx-auto px-4 py-8 grid gap-6 sm:grid-cols-3">
+      <div className="w-[95%] lg:w-[80%] mx-auto py-8 grid gap-6 sm:grid-cols-3">
         <div>
           <p className="text-white font-bold text-lg">✚ MediCore</p>
           <p className="mt-1 text-slate-400">Software Persona yazılım projesi</p>

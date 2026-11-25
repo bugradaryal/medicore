@@ -1,16 +1,20 @@
 # MediCore
 
-Hastane randevu sistemi. Web Geliştirme dersi JavaScript projesi olarak hazırladım. Backend yok, veriler tarayıcının LocalStorage'ında tutuluyor.
+Hastane randevu uygulaması. Web Geliştirme dersi JavaScript projesi olarak hazırladım.
+Backend ve giriş (login) yok, site açılır açılmaz kullanıma hazırdır. Randevular tarayıcının LocalStorage'ında tutulur.
 
-Canlı site: medicore-randevu.netlify.app
+Kullandıklarım: React, TypeScript, Vite, Tailwind CSS.
+Uygulama tek sayfadır: solda randevu formu (poliklinik seçimi dahil), sağda randevu listesi.
 
-Kullandıklarım: React, TypeScript, Vite, Tailwind CSS, React Router.
+## CRUD işlemleri
 
-## Neler yapılabiliyor
+- **Ekle:** Soldaki formda poliklinik, doktor, tarih ve saat seçilip randevu oluşturulur.
+- **Listele:** Sağdaki listede tüm randevular tarih sırasına göre listelenir.
+- **Güncelle:** Listede Düzenle ile ad, tarih, saat ve şikayet değiştirilir.
+- **Gidildi işareti:** Her randevunun yanındaki kutu işaretlenince randevu "Gidildi" olur ve üstü çizilir. Üstteki çubukta gidilen / toplam, geçen ve bekleyen randevu sayısı görünür.
+- **Sil:** Listede Sil ile tek randevu, Tümünü Sil ile bütün randevular kaldırılır.
 
-- Hasta kayıt olur, klinik ve doktor seçip randevu alır. Randevusunu düzenleyebilir, iptal edebilir, silebilir.
-- Doktor kendisine gelen randevuları onaylar veya iptal eder.
-- Yönetim klinik ve doktor ekler, düzenler, siler. Bütün randevuları da görür.
+16 klinik ve 32 hazır doktor vardır (src/data). Aynı doktora aynı gün ve saate iki randevu alınamaz.
 
 ## Çalıştırma
 
@@ -19,13 +23,12 @@ npm install
 npm run dev
 ```
 
-## Giriş bilgileri
+## Klasör yapısı
 
-Hasta hesabını kayıt sayfasından oluşturabilir. Çalışan girişi için hazır hesaplar var.
-
-- admin@medicore.com / 1234 (yönetim)
-- ayse@medicore.com / 1234(doktor)
-
-Veriler kurgusaldır, şifreler LocalStorage'da düz yazı olarak duruyor, sadece demo için.
-
-Netlify: https://medicore-randevu.netlify.app
+```
+src/
+  components/  Header, Footer, BookingForm, AppointmentList
+  interfaces/  Clinic, Doctor, Appointment tipleri
+  data/        hazır poliklinik ve doktor listesi
+  utility/     yardımcı fonksiyonlar ve localStorage state (useAppData)
+```
