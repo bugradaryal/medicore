@@ -83,13 +83,6 @@ export default function AppointmentList({ data }: { data: AppData }) {
             <div className="h-full rounded-full bg-gradient-to-r from-[#0D5C63] to-[#2FA7A0] transition-all duration-500" style={{ width: `${percent}%` }} />
           </div>
         </div>
-
-        <div className="grid grid-cols-4 gap-2 text-center text-sm">
-          <div className="rounded-lg bg-[#E6F2F4] py-2"><div className="font-bold text-[#0A4D56]">{total}</div><div className="text-xs text-slate-600">Toplam</div></div>
-          <div className="rounded-lg bg-green-50 py-2"><div className="font-bold text-green-700">{attendedCount}</div><div className="text-xs text-slate-600">Gidilen</div></div>
-          <div className="rounded-lg bg-amber-50 py-2"><div className="font-bold text-amber-700">{missedCount}</div><div className="text-xs text-slate-600">Geçen</div></div>
-          <div className="rounded-lg bg-sky-50 py-2"><div className="font-bold text-sky-700">{upcomingCount}</div><div className="text-xs text-slate-600">Bekleyen</div></div>
-        </div>
       </div>
 
       {error && <p className="bg-red-50 border border-red-200 text-red-700 text-sm rounded px-3 py-2">{error}</p>}
