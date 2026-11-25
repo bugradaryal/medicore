@@ -7,6 +7,8 @@ import type { AppData } from '../utility/state'
 
 const inputClass = 'mt-1 w-full border border-[#CBE4E8] bg-white rounded px-3 py-2 focus:outline-none focus:border-[#0D5C63]'
 
+type Filter = 'all' | 'attended' | 'missed' | 'upcoming'
+
 export default function AppointmentList({ data }: { data: AppData }) {
   const { appointments, updateAppointment, toggleAttended, deleteAppointment, deleteAllAppointments } = data
   const list = sortAppointments(appointments)
@@ -14,6 +16,7 @@ export default function AppointmentList({ data }: { data: AppData }) {
   const [openId, setOpenId] = useState<string | null>(null) // şikayeti açılmış kart
   const [form, setForm] = useState({ patientName: '', date: '', time: '', complaint: '' })
   const [error, setError] = useState('')
+  const [filter, setFilter] = useState<Filter>('all')
 
   // İstatistikler
   const total = list.length
@@ -21,6 +24,20 @@ export default function AppointmentList({ data }: { data: AppData }) {
   const missedCount = list.filter((a) => !a.attended && isPast(a)).length // tarihi geçmiş ama gidilmemiş
   const upcomingCount = total - attendedCount - missedCount
   const percent = total === 0 ? 0 : Math.round((attendedCount / total) * 100)
+
+  // Filtre
+  const visible = list.filter((a) => {
+    if (filter === 'attended') return a.attended
+    if (filter === 'missed') return !a.attended && isPast(a)
+    if (filter === 'upcoming') return !a.attended && !isPast(a)
+    return true
+  })
+  const tabs: { key: Filter; label: string; count: number; active: string }[] = [
+    { key: 'all', label: 'Hepsi', count: total, active: 'bg-[#0D5C63] text-white' },
+    { key: 'upcoming', label: 'Bekleyen', count: upcomingCount, active: 'bg-sky-600 text-white' },
+    { key: 'missed', label: 'Geçen', count: missedCount, active: 'bg-amber-500 text-white' },
+    { key: 'attended', label: 'Gidilen', count: attendedCount, active: 'bg-green-600 text-white' },
+  ]
 
   function startEdit(a: Appointment) {
     setError('')
@@ -66,22 +83,36 @@ export default function AppointmentList({ data }: { data: AppData }) {
             <div className="h-full rounded-full bg-gradient-to-r from-[#0D5C63] to-[#2FA7A0] transition-all duration-500" style={{ width: `${percent}%` }} />
           </div>
         </div>
-
-        <div className="grid grid-cols-4 gap-2 text-center text-sm">
-          <div className="rounded-lg bg-[#E6F2F4] py-2"><div className="font-bold text-[#0A4D56]">{total}</div><div className="text-xs text-slate-600">Toplam</div></div>
-          <div className="rounded-lg bg-green-50 py-2"><div className="font-bold text-green-700">{attendedCount}</div><div className="text-xs text-slate-600">Gidilen</div></div>
-          <div className="rounded-lg bg-amber-50 py-2"><div className="font-bold text-amber-700">{missedCount}</div><div className="text-xs text-slate-600">Geçen</div></div>
-          <div className="rounded-lg bg-sky-50 py-2"><div className="font-bold text-sky-700">{upcomingCount}</div><div className="text-xs text-slate-600">Bekleyen</div></div>
-        </div>
       </div>
 
       {error && <p className="bg-red-50 border border-red-200 text-red-700 text-sm rounded px-3 py-2">{error}</p>}
+
+      {total > 0 && (
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl border border-[#CBE4E8] p-1.5 grid grid-cols-4 gap-1 text-sm" role="tablist" aria-label="Randevu filtresi">
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={filter === t.key}
+              onClick={() => setFilter(t.key)}
+              className={`rounded-lg px-2 py-1.5 font-medium transition-colors cursor-pointer ${filter === t.key ? t.active : 'text-slate-600 hover:bg-[#E6F2F4]'}`}
+            >
+              {t.label} <span className={filter === t.key ? 'text-white/80' : 'text-slate-400'}>{t.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {list.length > 0 && visible.length === 0 && (
+        <p className="bg-white/90 backdrop-blur-sm rounded-xl border border-[#CBE4E8] p-6 text-center text-slate-500">Bu filtrede randevu yok.</p>
+      )}
 
       {list.length === 0 && (
         <p className="bg-white/90 backdrop-blur-sm rounded-xl border border-[#CBE4E8] p-6 text-center text-slate-500">Henüz randevun yok. Soldan poliklinik ve doktor seçerek ilk randevunu al.</p>
       )}
 
-      {list.map((a) => {
+      {visible.map((a) => {
         const missed = !a.attended && isPast(a)
         const editing = editId === a.id
         const open = openId === a.id
