@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Appointment } from '../interfaces'
-import { isTaken } from './utils'
+import { isTaken, isValidDate } from './utils'
 
 const APPOINTMENTS_KEY = 'medicore_appointments_v2'
 
@@ -23,6 +23,9 @@ export function useAppData() {
 
   // EKLE
   function addAppointment(data: NewAppointment) {
+    if (!isValidDate(data.date)) {
+      throw new Error('Lütfen geçerli bir tarih seçin.')
+    }
     if (isTaken(appointments, data.doctorId, data.date, data.time)) {
       throw new Error('Bu saat dolu, başka bir saat seçin.')
     }
@@ -32,6 +35,9 @@ export function useAppData() {
 
   // GÜNCELLE
   function updateAppointment(item: Appointment) {
+    if (!isValidDate(item.date)) {
+      throw new Error('Lütfen geçerli bir tarih seçin.')
+    }
     if (isTaken(appointments, item.doctorId, item.date, item.time, item.id)) {
       throw new Error('Bu saat dolu, başka bir saat seçin.')
     }

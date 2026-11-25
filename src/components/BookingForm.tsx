@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { clinics } from '../data/clinics'
 import { doctors } from '../data/doctors'
-import { doctorsOf, formatDayLong, freeSlots } from '../utility/utils'
+import { doctorsOf, formatDayLong, freeSlots, isValidDate } from '../utility/utils'
 import type { AppData } from '../utility/state'
 
 const inputClass = 'mt-1 w-full border border-[#CBE4E8] bg-white rounded px-3 py-2 focus:outline-none focus:border-[#0D5C63]'
@@ -20,7 +20,7 @@ export default function BookingForm({ data }: { data: AppData }) {
   const [success, setSuccess] = useState(false)
 
   const clinicDoctors = clinicId ? doctorsOf(doctors, clinicId) : []
-  const slots = doctorId && date ? freeSlots(appointments, doctorId, date) : []
+  const slots = doctorId && isValidDate(date) ? freeSlots(appointments, doctorId, date) : []
 
   function pickClinic(id: string) {
     setClinicId(id)
@@ -40,6 +40,10 @@ export default function BookingForm({ data }: { data: AppData }) {
     setError('')
     if (!clinicId || !doctorId) {
       setError('Lütfen poliklinik ve doktor seçin.')
+      return
+    }
+    if (!isValidDate(date)) {
+      setError('Lütfen geçerli bir tarih seçin.')
       return
     }
     if (!time) {
@@ -94,7 +98,9 @@ export default function BookingForm({ data }: { data: AppData }) {
             <input type="date" value={date} onChange={(e) => { setDate(e.target.value); setTime('') }} required className={inputClass} />
           </label>
 
-          {date && (
+          {date && !isValidDate(date) && <p className="text-sm text-amber-700">Geçerli bir tarih seçin.</p>}
+
+          {isValidDate(date) && (
             <div>
               <p className="text-sm mb-2">{formatDayLong(date)}</p>
               {slots.length === 0 ? (

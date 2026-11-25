@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Appointment } from '../interfaces'
 import { clinics } from '../data/clinics'
 import { doctors } from '../data/doctors'
-import { clinicName, doctorName, formatDay, freeSlots, isPast, sortAppointments } from '../utility/utils'
+import { clinicName, doctorName, formatDay, freeSlots, isPast, isValidDate, sortAppointments } from '../utility/utils'
 import type { AppData } from '../utility/state'
 
 const inputClass = 'mt-1 w-full border border-[#CBE4E8] bg-white rounded px-3 py-2 focus:outline-none focus:border-[#0D5C63]'
@@ -11,6 +11,7 @@ export default function AppointmentList({ data }: { data: AppData }) {
   const { appointments, updateAppointment, toggleAttended, deleteAppointment, deleteAllAppointments } = data
   const list = sortAppointments(appointments)
   const [editId, setEditId] = useState<string | null>(null)
+  const [openId, setOpenId] = useState<string | null>(null) // şikayeti açılmış kart
   const [form, setForm] = useState({ patientName: '', date: '', time: '', complaint: '' })
   const [error, setError] = useState('')
 
@@ -28,6 +29,10 @@ export default function AppointmentList({ data }: { data: AppData }) {
   }
 
   function saveEdit(a: Appointment) {
+    if (!isValidDate(form.date)) {
+      setError('Lütfen geçerli bir tarih seçin.')
+      return
+    }
     if (!form.time) {
       setError('Lütfen bir saat seçin.')
       return
@@ -78,34 +83,48 @@ export default function AppointmentList({ data }: { data: AppData }) {
 
       {list.map((a) => {
         const missed = !a.attended && isPast(a)
+        const editing = editId === a.id
+        const open = openId === a.id
         return (
-          <div key={a.id} className={`bg-white/90 backdrop-blur-sm rounded-xl border border-l-4 p-4 space-y-3 transition-colors ${a.attended ? 'border-[#CBE4E8] border-l-green-500' : missed ? 'border-[#CBE4E8] border-l-amber-500' : 'border-[#CBE4E8] border-l-[#0D5C63]'}`}>
-            <div className="flex items-start gap-3">
+          <div key={a.id} className={`bg-white/90 backdrop-blur-sm rounded-xl border border-l-4 px-4 py-3 transition-colors ${a.attended ? 'border-[#CBE4E8] border-l-green-500' : missed ? 'border-[#CBE4E8] border-l-amber-500' : 'border-[#CBE4E8] border-l-[#0D5C63]'}`}>
+            <div className="flex items-center gap-3">
               <input
                 type="checkbox"
                 checked={!!a.attended}
                 onChange={() => toggleAttended(a.id)}
                 aria-label="Randevuya gidildi"
-                className="mt-1 h-5 w-5 shrink-0 accent-[#0D5C63] cursor-pointer"
+                className="h-5 w-5 shrink-0 accent-[#0D5C63] cursor-pointer"
               />
+
               <div className="flex-1 min-w-0">
                 <div className={a.attended ? 'line-through text-slate-400' : ''}>
-                  <p className="font-semibold text-[#0A4D56]">
-                    <span className={a.attended ? 'text-slate-400' : ''}>{doctorName(doctors, a.doctorId)}</span>
+                  <p className={`font-semibold truncate ${a.attended ? '' : 'text-[#0A4D56]'}`}>{doctorName(doctors, a.doctorId)}</p>
+                  <p className="text-xs text-slate-500 truncate">{clinicName(clinics, a.clinicId)} · {a.patientName}</p>
+                  <p
+                    onClick={() => setOpenId(open ? null : a.id)}
+                    title="Tamamını görmek için tıkla"
+                    className={`text-sm mt-0.5 break-words cursor-pointer ${open ? '' : 'line-clamp-2'}`}
+                  >
+                    {a.complaint}
                   </p>
-                  <p className="text-sm text-slate-600"><span className={a.attended ? 'text-slate-400' : ''}>{clinicName(clinics, a.clinicId)} · Hasta: {a.patientName}</span></p>
-                  <p className="text-sm mt-1">{a.complaint}</p>
                 </div>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
                   <span className="rounded-full bg-[#E6F2F4] text-[#0D5C63] px-2 py-0.5 font-medium">{formatDay(a.date)} · {a.time}</span>
                   {a.attended && <span className="rounded-full bg-green-100 text-green-700 px-2 py-0.5 font-medium">✓ Gidildi</span>}
                   {missed && <span className="rounded-full bg-amber-100 text-amber-700 px-2 py-0.5 font-medium">Tarihi geçti</span>}
                 </div>
               </div>
+
+              {!editing && (
+                <div className="flex shrink-0 gap-2 text-sm">
+                  <button onClick={() => startEdit(a)} className="border border-[#CBE4E8] bg-white rounded-lg px-3 py-1 text-[#0D5C63] hover:bg-[#0D5C63]/10 transition-colors cursor-pointer">Düzenle</button>
+                  <button onClick={() => window.confirm('Randevu silinsin mi?') && deleteAppointment(a.id)} className="border border-red-200 bg-white rounded-lg px-3 py-1 text-red-600 hover:bg-red-100 transition-colors cursor-pointer">Sil</button>
+                </div>
+              )}
             </div>
 
-            {editId === a.id ? (
-              <div className="border-t border-[#CBE4E8] pt-3 grid gap-3 sm:grid-cols-2">
+            {editing && (
+              <div className="mt-3 border-t border-[#CBE4E8] pt-3 grid gap-3 sm:grid-cols-2">
                 <label className="text-sm sm:col-span-2">
                   Ad Soyad
                   <input value={form.patientName} onChange={(e) => setForm({ ...form, patientName: e.target.value })} className={inputClass} />
@@ -118,7 +137,7 @@ export default function AppointmentList({ data }: { data: AppData }) {
                   Saat
                   <select value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} className={inputClass}>
                     <option value="">Seç</option>
-                    {freeSlots(appointments, a.doctorId, form.date, a.id).map((t) => (
+                    {(isValidDate(form.date) ? freeSlots(appointments, a.doctorId, form.date, a.id) : []).map((t) => (
                       <option key={t} value={t}>{t}</option>
                     ))}
                   </select>
@@ -131,11 +150,6 @@ export default function AppointmentList({ data }: { data: AppData }) {
                   <button onClick={() => saveEdit(a)} className="bg-[#0D5C63] hover:bg-[#0A4D56] text-white rounded px-4 py-2 text-sm transition-colors cursor-pointer">Kaydet</button>
                   <button onClick={() => setEditId(null)} className="border border-[#CBE4E8] bg-white hover:bg-slate-100 rounded px-4 py-2 text-sm transition-colors cursor-pointer">Vazgeç</button>
                 </div>
-              </div>
-            ) : (
-              <div className="border-t border-[#CBE4E8] pt-3 flex flex-wrap gap-2 text-sm">
-                <button onClick={() => startEdit(a)} className="border border-[#CBE4E8] bg-white rounded px-3 py-1 text-[#0D5C63] hover:bg-[#0D5C63]/10 transition-colors cursor-pointer">Düzenle</button>
-                <button onClick={() => window.confirm('Randevu silinsin mi?') && deleteAppointment(a.id)} className="border border-[#CBE4E8] bg-white rounded px-3 py-1 text-red-600 hover:bg-red-100 transition-colors cursor-pointer">Sil</button>
               </div>
             )}
           </div>

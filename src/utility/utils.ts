@@ -10,10 +10,12 @@ export function todayStr(): string {
 }
 
 export function formatDay(date: string): string {
+  if (!isValidDate(date)) return '-'
   return new Date(date + 'T00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })
 }
 
 export function formatDayLong(date: string): string {
+  if (!isValidDate(date)) return '-'
   return new Date(date + 'T00:00').toLocaleDateString('tr-TR', {
     day: 'numeric',
     month: 'long',
@@ -56,4 +58,14 @@ export function freeSlots(appointments: Appointment[], doctorId: string, date: s
 
 export function isPast(a: Appointment): boolean {
   return new Date(`${a.date}T${a.time}`).getTime() < Date.now()
+}
+
+// YYYY-MM-DD formatında ve takvimde gerçekten var olan bir tarih mi?
+// Kullanıcı yıl yazarken ara değerler geçersiz sayılır ama input silinmez.
+export function isValidDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const [y, m, d] = value.split('-').map(Number)
+  const dt = new Date(2000, 0, 1)
+  dt.setFullYear(y, m - 1, d)
+  return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d // 31 Şubat gibi tarihleri ele
 }
