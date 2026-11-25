@@ -8,10 +8,14 @@ const inputClass = 'mt-1 w-full border border-[#CBE4E8] bg-white rounded px-3 py
 const optionClass = (active: boolean) =>
   `text-left rounded-lg border px-3 py-2 text-sm transition-colors cursor-pointer ${active ? 'border-[#0D5C63] bg-[#E6F2F4] text-[#0D5C63] font-medium' : 'border-[#CBE4E8] bg-white hover:border-[#0D5C63]'}`
 
+// Varsayılan: ilk poliklinik (Dahiliye) ve onun ilk doktoru (Dr. Ayşe Kaya)
+const DEFAULT_CLINIC = clinics[0].id
+const DEFAULT_DOCTOR = doctorsOf(doctors, DEFAULT_CLINIC)[0].id
+
 export default function BookingForm({ data }: { data: AppData }) {
   const { appointments, addAppointment } = data
-  const [clinicId, setClinicId] = useState('')
-  const [doctorId, setDoctorId] = useState('')
+  const [clinicId, setClinicId] = useState(DEFAULT_CLINIC)
+  const [doctorId, setDoctorId] = useState(DEFAULT_DOCTOR)
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [patientName, setPatientName] = useState('')
@@ -19,12 +23,12 @@ export default function BookingForm({ data }: { data: AppData }) {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
-  const clinicDoctors = clinicId ? doctorsOf(doctors, clinicId) : []
+  const clinicDoctors = doctorsOf(doctors, clinicId)
   const slots = doctorId && isValidDate(date) ? freeSlots(appointments, doctorId, date) : []
 
   function pickClinic(id: string) {
     setClinicId(id)
-    setDoctorId('')
+    setDoctorId(doctorsOf(doctors, id)[0]?.id ?? '') // kliniğin ilk doktoru otomatik seçilir
     setTime('')
     setSuccess(false)
   }
@@ -52,8 +56,8 @@ export default function BookingForm({ data }: { data: AppData }) {
     }
     try {
       addAppointment({ patientName: patientName.trim(), doctorId, clinicId, date, time, complaint: complaint.trim() })
-      setClinicId('')
-      setDoctorId('')
+      setClinicId(DEFAULT_CLINIC)
+      setDoctorId(DEFAULT_DOCTOR)
       setDate('')
       setTime('')
       setPatientName('')
@@ -80,16 +84,14 @@ export default function BookingForm({ data }: { data: AppData }) {
         </div>
       </div>
 
-      {clinicId && (
-        <div>
-          <p className="text-sm font-medium mb-1">Doktor</p>
-          <div className="grid grid-cols-2 gap-2">
-            {clinicDoctors.map((d) => (
-              <button key={d.id} type="button" onClick={() => pickDoctor(d.id)} className={optionClass(d.id === doctorId)}>{d.name}</button>
-            ))}
-          </div>
+      <div>
+        <p className="text-sm font-medium mb-1">Doktor</p>
+        <div className="grid grid-cols-2 gap-2">
+          {clinicDoctors.map((d) => (
+            <button key={d.id} type="button" onClick={() => pickDoctor(d.id)} className={optionClass(d.id === doctorId)}>{d.name}</button>
+          ))}
         </div>
-      )}
+      </div>
 
       {doctorId && (
         <>
