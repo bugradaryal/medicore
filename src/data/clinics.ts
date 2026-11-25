@@ -1,6 +1,6 @@
 import type { Clinic } from '../interfaces'
 
-export const seedClinics: Clinic[] = [
+export const clinics: Clinic[] = [
   { id: 'c1', name: 'Dahiliye', description: 'Erişkin hastalıkların tanı ve tedavisi.' },
   { id: 'c2', name: 'Kardiyoloji', description: 'Kalp ve damar hastalıkları, tansiyon takibi.' },
   { id: 'c3', name: 'Nöroloji', description: 'Baş ağrısı, migren ve sinir sistemi hastalıkları.' },

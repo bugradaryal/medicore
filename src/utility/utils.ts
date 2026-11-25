@@ -1,22 +1,9 @@
-import type { Appointment, Clinic, Role, Status, User } from '../interfaces'
-
-export const roleLabels: Record<Role, string> = {
-  hasta: 'Hasta',
-  doktor: 'Doktor',
-  yonetim: 'Yönetim',
-}
-
-export const statusLabels: Record<Status, string> = {
-  beklemede: 'Beklemede',
-  onaylandi: 'Onaylandı',
-  iptal: 'İptal',
-}
+import type { Appointment, Clinic, Doctor } from '../interfaces'
 
 export const timeSlots: string[] = Array.from({ length: 16 }, (_, i) => {
   const m = 9 * 60 + i * 30
   return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
 })
-
 
 export function todayStr(): string {
   return new Date().toLocaleDateString('sv-SE')
@@ -39,23 +26,16 @@ export function clinicName(clinics: Clinic[], id: string): string {
   return clinics.find((c) => c.id === id)?.name ?? '-'
 }
 
-export function userName(users: User[], id: string): string {
-  return users.find((u) => u.id === id)?.name ?? '-'
+export function doctorName(doctors: Doctor[], id: string): string {
+  return doctors.find((d) => d.id === id)?.name ?? '-'
 }
 
-export function doctorsOf(users: User[], clinicId?: string): User[] {
-  return users.filter((u) => u.role === 'doktor' && (!clinicId || u.clinicId === clinicId))
+export function doctorsOf(doctors: Doctor[], clinicId: string): Doctor[] {
+  return doctors.filter((d) => d.clinicId === clinicId)
 }
 
-// Hasta kendi randevularını, doktor kendisine alınanları, yönetim hepsini görür
-export function appointmentsOf(appointments: Appointment[], user: User): Appointment[] {
-  return appointments
-    .filter((a) => {
-      if (user.role === 'hasta') return a.patientId === user.id
-      if (user.role === 'doktor') return a.doctorId === user.id
-      return true
-    })
-    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
+export function sortAppointments(list: Appointment[]): Appointment[] {
+  return [...list].sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))
 }
 
 export function isTaken(
@@ -66,12 +46,7 @@ export function isTaken(
   ignoreId?: string,
 ): boolean {
   return appointments.some(
-    (a) =>
-      a.doctorId === doctorId &&
-      a.date === date &&
-      a.time === time &&
-      a.status !== 'iptal' &&
-      a.id !== ignoreId,
+    (a) => a.doctorId === doctorId && a.date === date && a.time === time && a.id !== ignoreId,
   )
 }
 

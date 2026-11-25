@@ -1,13 +1,7 @@
 @import "tailwindcss";
 
-body:has(.home-page) {
+body {
   background:
     linear-gradient(rgba(244, 249, 250, 0.35), rgba(244, 249, 250, 0.35)),
     url('/home-bg.jpg') center / cover no-repeat fixed;
-}
-
-body:has(.image-page) {
-  background:
-    linear-gradient(rgba(244, 249, 250, 0.35), rgba(244, 249, 250, 0.35)),
-    url('/bg.jpg') center / cover no-repeat fixed;
 }
